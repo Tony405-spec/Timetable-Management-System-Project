@@ -21,13 +21,13 @@ CREATE TABLE Courses (
 -- Table to store timetable entries
 CREATE TABLE Timetable (
     timetable_id SERIAL PRIMARY KEY,
-    day_id INT REFERENCES Days(day_id),
-    time_slot VARCHAR(20),
-    room VARCHAR(50),
-    unit_code VARCHAR(10) REFERENCES Courses(unit_code),
-    lecturer_id INT REFERENCES Lecturers(lecturer_id),
-    duration FLOAT,
-    class_size INT,
+    day_id INT NOT NULL REFERENCES Days(day_id),
+    time_slot VARCHAR(20) NOT NULL,
+    room VARCHAR(50) NOT NULL,
+    unit_code VARCHAR(10) NOT NULL REFERENCES Courses(unit_code),
+    lecturer_id INT NOT NULL REFERENCES Lecturers(lecturer_id),
+    duration FLOAT NOT NULL CHECK (duration > 0),
+    class_size INT CHECK (class_size IS NULL OR class_size >= 0),
     program VARCHAR(50),
     mode VARCHAR(10) CHECK (mode IN ('FT', 'PT', 'DL')),
     campus VARCHAR(50),
@@ -41,10 +41,11 @@ CREATE TABLE Timetable (
 -- Table to manage room allocation
 CREATE TABLE RoomAllocation (
     room_id SERIAL PRIMARY KEY,
-    room VARCHAR(50),
+    room VARCHAR(50) NOT NULL,
     is_occupied BOOLEAN DEFAULT FALSE,
-    allocation_start TIMESTAMP,
-    allocation_end TIMESTAMP
+    allocation_start TIMESTAMP NOT NULL,
+    allocation_end TIMESTAMP NOT NULL,
+    CONSTRAINT valid_allocation_window CHECK (allocation_end > allocation_start)
 );
 
 -- Function to update RoomAllocation based on Timetable entries
